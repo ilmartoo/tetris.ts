@@ -1,0 +1,9 @@
+# Node files
+node_modules/
+
+# IntelliJ Files
+.idea/
+
+# Typescript compiled files
+app/**.js
+app/**.js.map
