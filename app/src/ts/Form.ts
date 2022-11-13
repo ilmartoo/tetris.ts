@@ -1,4 +1,4 @@
-import { Color, Rotation, Vector } from './constants';
+import {Color, Rotation, Vector} from './constants';
 
 export class Form {
 	private _size: Vector;
@@ -15,14 +15,25 @@ export class Form {
 
 	get locations() { return this._locations; }
 
-	rotate(direction: Rotation) {
+	rotate(direction: Rotation, isValid?: (location: Vector[]) => boolean) {
 		const locations = [...this._locations] as Vector[];
 		if (direction === Rotation.left) {
-			this._locations = locations.map(l => ({x: this._size.y - l.y - 1, y: l.x} as Vector));
+			const newLocations = locations.map(l => ({x: this._size.y - l.y - 1, y: l.x} as Vector));
+			if (!isValid || isValid(newLocations)) {
+				this._locations = newLocations;
+				this.invertSize();
+			}
 		}
-		else {
-			this._locations = locations.map(l => ({x: l.y, y: this._size.x - l.x - 1} as Vector));
+		else if (direction === Rotation.right) {
+			const newLocations = locations.map(l => ({x: l.y, y: this._size.x - l.x - 1} as Vector));
+			if (!isValid || isValid(newLocations)) {
+				this._locations = newLocations;
+				this.invertSize();
+			}
 		}
+	}
+
+	private invertSize() {
 		this._size = {x: this._size.y, y: this._size.x} as Vector;
 	}
 }

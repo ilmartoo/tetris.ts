@@ -61,12 +61,11 @@ export class Table extends GameElement {
 		return square.solid && !this.colored.includes(square);
 	}
 
-	private isPlaceable(location: Vector): boolean {
-		for (const l of this.piece.locations) {
+	private isPlaceable(location: Vector, pieceLocations?: Vector[]): boolean {
+		for (const l of pieceLocations ? pieceLocations : this.piece.locations) {
 			const x = l.x + location.x;
 			const y = l.y + location.y;
-			const square = this.at(x, y);
-			if (x < 0 || y < 0 || x >= this.size.x || y >= this.size.y || this.isDeadSquare(square)) {
+			if (x < 0 || y < 0 || x >= this.size.x || y >= this.size.y || this.isDeadSquare(this.at(x, y))) {
 				return false;
 			}
 		}
@@ -127,6 +126,13 @@ export class Table extends GameElement {
 			}
 		}
 
+		for (const l of lines) {
+			for (let j = 0; j < this.size.y; ++j) {
+				// Todo move rows down
+			}
+		}
+		this.element.children
+
 		// TODO: scoring
 		//
 		// for (const i of lines) {
@@ -175,6 +181,7 @@ export class Table extends GameElement {
 			// Drop
 			case Move.drop: {
 				this.location = this.dropLocation().sort((a, b) => (a.x === b.x) ? (a.y - b.y) : (a.x - b.x))[0];
+				this.colorSquares();
 				this.killPiece();
 			} break;
 			default: {
@@ -184,7 +191,7 @@ export class Table extends GameElement {
 	}
 
 	rotate(rotation: Rotation): void {
-		this.piece.rotate(rotation);
+		this.piece.rotate(rotation, (locations: Vector[]) => { return this.isPlaceable(this.location, locations); });
 		this.drawPiece();
 	}
 }
