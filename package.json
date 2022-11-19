@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Tetris counterfeit to start on game development",
   "scripts": {
-		"watch": "budo src/main.ts:bundle.js --live --open --dir src -- -p [ tsify --noImplicitAny ] > src/static/bundle.js",
-		"start": "budo src/main.ts:bundle.js --open --dir src -- -p [ tsify --noImplicitAny ] > src/static/bundle.js"
+    "watch": "budo src/main.ts:bundle.js --live --open --dir src -- -p [ tsify --noImplicitAny ] > src/static/bundle.js",
+    "start": "budo src/main.ts:bundle.js --open --dir src -- -p [ tsify --noImplicitAny ] > src/static/bundle.js"
   },
   "keywords": [
     "tetris",
@@ -15,6 +15,7 @@
   "dependencies": {
     "browserify": "^17.0.0",
     "budo": "^11.8.4",
+    "rxjs": "^7.5.7",
     "tsify": "^5.0.4"
   },
   "devDependencies": {
