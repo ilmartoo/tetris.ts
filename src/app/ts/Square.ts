@@ -4,10 +4,10 @@ import { GameElement } from './GameElement';
 export class Square extends GameElement {
 	private _color: Color;
 
-	constructor(parent?: HTMLElement) {
+	constructor(parent?: HTMLElement, color?: Color) {
 		super('div', parent);
 		this.element.classList.add('grid-square');
-		this._color = Color.transparent;
+		this._color = color ? color : Color.transparent;
 	}
 
 	get color() { return this._color; }

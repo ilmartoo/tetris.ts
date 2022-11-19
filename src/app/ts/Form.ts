@@ -1,13 +1,13 @@
 import {Color, Rotation, Vector} from './constants';
 
 export class Form {
-	private _size: Vector;
-	private _locations: Vector[];
-	readonly color: Color;
+	private readonly _size: Vector;
+	private readonly _locations: Vector[];
+	private readonly _color: Color;
 
 	constructor(size: Vector, locations: Vector[], color: Color) {
 		this._size = size;
-		this.color = color;
+		this._color = color;
 		this._locations = locations;
 	}
 
@@ -15,26 +15,12 @@ export class Form {
 
 	get locations() { return this._locations; }
 
-	rotate(direction: Rotation, isValid?: (location: Vector[]) => boolean) {
-		const locations = [...this._locations] as Vector[];
-		if (direction === Rotation.left) {
-			const newLocations = locations.map(l => ({x: this._size.y - l.y - 1, y: l.x} as Vector));
-			if (!isValid || isValid(newLocations)) {
-				this._locations = newLocations;
-				this.invertSize();
-			}
-		}
-		else if (direction === Rotation.right) {
-			const newLocations = locations.map(l => ({x: l.y, y: this._size.x - l.x - 1} as Vector));
-			if (!isValid || isValid(newLocations)) {
-				this._locations = newLocations;
-				this.invertSize();
-			}
-		}
-	}
+	get color() { return this._color; }
 
-	private invertSize() {
-		this._size = {x: this._size.y, y: this._size.x} as Vector;
+	rotate(direction: Rotation): Form {
+		const locations: Vector[] = [...this._locations];
+		const newLocations = direction === Rotation.left ? locations.map(l => ({x: this._size.y - l.y - 1, y: l.x} as Vector)) : locations.map(l => ({x: l.y, y: this._size.x - l.x - 1} as Vector));
+		return new Form({x: this._size.y, y: this._size.x} as Vector, newLocations, this.color);
 	}
 }
 
