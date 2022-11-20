@@ -17,11 +17,5 @@ export class GameElement {
 
 	get HTMLElement(): HTMLElement { return this.element; }
 
-	get text(): string { return this.element.innerText; }
-
 	set text(text: string) { this.element.innerText = text; }
-
-	get content(): string { return this.element.innerHTML; }
-
-	set content(content: string) { this.element.innerHTML = content; }
 }
