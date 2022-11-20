@@ -9,6 +9,9 @@ export class Table extends GameElement {
 	private size: Vector;
 	private readonly grid: Square[] = [];
 
+	private numTetris = 0;
+	private gameOver = false;
+
 	private location: Vector;
 	private piece: Form;
 	private nextPieces: HolderQueue = new HolderQueue([ 'next-1', 'next-2', 'next-3' ]);
@@ -36,6 +39,10 @@ export class Table extends GameElement {
 		// Get principal piece
 		this.newPiece();
 	}
+
+	get numberOfTetris() { return this.numTetris; }
+
+	get isGameOver() { return this.gameOver; }
 
 	private at(x: number, y: number): Square { return this.grid[y + x * this.size.y]; }
 
@@ -152,21 +159,25 @@ export class Table extends GameElement {
 			}
 		}
 
-		// for (const l of lines) {
-		// 	for (let j = 0; j < this.size.y; ++j) {
-		// 		// Todo move rows down
-		// 	}
-		// }
-		// this.element.children
-
-		// TODO: scoring
+		// if (lines.length > 0) {
+		// 	this.numTetris++;
 		//
-		// for (const i of lines) {
-		// 	// this.element.children
-		// 	console.log('Line', i);
-		// 	const squares = this.grid.splice(i * this.size.y, this.size.y);
-		// 	squares.forEach(s => s.clear());
-		// 	this.grid.unshift(...squares);
+		// // for (const l of lines) {
+		// // 	for (let j = 0; j < this.size.y; ++j) {
+		// // 		// Todo move rows down
+		// // 	}
+		// // }
+		// // this.element.children
+		//
+		// // TODO: scoring
+		// //
+		// // for (const i of lines) {
+		// // 	// this.element.children
+		// // 	console.log('Line', i);
+		// // 	const squares = this.grid.splice(i * this.size.y, this.size.y);
+		// // 	squares.forEach(s => s.clear());
+		// // 	this.grid.unshift(...squares);
+		// // }
 		// }
 	}
 
