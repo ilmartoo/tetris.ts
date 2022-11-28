@@ -8,6 +8,10 @@ export class HolderQueue {
 		ids.forEach(id => this.queue.push(new Holder(id)));
 	}
 
+	peek(): Form {
+		return this.queue[0].piece;
+	}
+
 	next(piece: Form): Form {
 		const next = this.queue[0].piece;
 
