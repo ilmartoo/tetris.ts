@@ -18,4 +18,8 @@ export class GameElement {
 	get HTMLElement(): HTMLElement { return this.element; }
 
 	set text(text: string) { this.element.innerText = text; }
+
+	clear() {
+		this.element.innerHTML = '';
+	}
 }
