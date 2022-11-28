@@ -1,27 +1,33 @@
 {
-  "name": "tetris",
-  "version": "1.0.0",
-  "description": "Tetris counterfeit to start on game development",
-  "scripts": {
-    "watch": "budo src/main.ts:bundle.js --live --open --dir src -- -p [ tsify --noImplicitAny ] > src/static/bundle.js",
-    "start": "budo src/main.ts:bundle.js --open --dir src -- -p [ tsify --noImplicitAny ] > src/static/bundle.js"
-  },
-  "keywords": [
-    "tetris",
-    "game"
-  ],
-  "author": "github.com/ilmartoo",
-  "license": "MIT",
-  "dependencies": {
-    "browserify": "^17.0.0",
-    "budo": "^11.8.4",
-    "rxjs": "^7.5.7",
-    "tsify": "^5.0.4"
-  },
-  "devDependencies": {
-    "@types/node": "^18.11.9",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.8.4",
-    "watchify": "^4.0.0"
-  }
+	"name": "tetris",
+	"version": "1.0.0",
+	"description": "Tetris counterfeit to start on game development",
+	"scripts": {
+		"makeTarget": "rimraf target/ && make-dir target/",
+		"copyFiles": "copyfiles -f src/static/* target/",
+		"compile": "browserify src/main.ts -p [ tsify --noImplicitAny ] > target/bundle.js",
+		"build": "npm run makeTarget && npm run copyFiles && npm run compile",
+		"watch": "budo src/main.ts:bundle.js --live --open --dir src/static -- -p [ tsify --noImplicitAny ]"
+	},
+	"keywords": [
+		"tetris",
+		"game"
+	],
+	"author": "github.com/ilmartoo",
+	"license": "MIT",
+	"dependencies": {
+		"browserify": "^17.0.0",
+		"budo": "^11.8.4",
+		"copyfiles": "^2.4.1",
+		"make-dir-cli": "^3.0.0",
+		"rimraf": "^3.0.2",
+		"rxjs": "^7.5.7",
+		"tsify": "^5.0.4"
+	},
+	"devDependencies": {
+		"@types/node": "^18.11.9",
+		"ts-node": "^10.9.1",
+		"typescript": "^4.8.4",
+		"watchify": "^4.0.0"
+	}
 }

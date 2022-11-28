@@ -7,3 +7,6 @@ node_modules/
 # Typescript compiled files
 src/**/*.js
 src/**/*.js.map
+
+# Output directory
+target/
