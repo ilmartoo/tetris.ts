@@ -2,7 +2,7 @@ import { Table } from './Table';
 import { Move, Rotation, Vector } from './constants';
 import { fromEvent, interval, Subscription } from 'rxjs';
 import { Menu } from './Menu';
-import { Level } from './Level';
+import { Value } from './Value';
 
 export class Game {
 	// Elements
@@ -11,111 +11,107 @@ export class Game {
 	private level: Value;
 	private score: Value;
 
-	// Game Start
+	// Game Start & Finish
 	private isPaused: boolean;
+	private isGameOver: boolean;
 
 	// Movement
-	private moving: boolean;
 	private keypressSubs: Subscription;
 
 	// Leveling
 	private readonly STARTING_LEVEL = 1;
 	private readonly BASE_TIME_INTERVAL = 2000; // 2 seconds
-	private readonly NUM_TETRIS_TO_LEVEL_UP = 15;
+	private readonly NUM_TETRIS_TO_LEVEL_UP = 5;
+	private numTetris: number;
 	private fallTimerSubs: Subscription;
+
+	// Scoring
+	private readonly TETRIS_SCORE = 100;
+	private readonly TETRIS_SCORE_UPGRADE = 1.6;
+	private readonly LEVEL_UP_SCORE = 250;
+	private readonly LEVEL_UP_SCORE_UPGRADE = 1.5;
 
 	constructor() {
 		this.setup();
 	}
 
-	// GAME SETUP
-	private setup() {
-		// Elements
-		this.tableEl = new Table('game-table', { x: 20, y: 10 } as Vector);
-		this.menuEl = new Menu('game-menu');
-		this.levelEl = new Level('game-level');
-
-		// Game start
-		this.isPaused = true;
-
-		// Leveling
-		this.levelEl.level = this.STARTING_LEVEL;
-
-		// Movement
-		this.moving = false;
-		this.keypressSubs = fromEvent<KeyboardEvent>(document, 'keydown').subscribe(e => this.processMovement(e));
-	}
-
 	private processMovement(e: KeyboardEvent) {
-		if (this.isPaused) {
+		if (this.isGameOver) {
+			this.clearElements();
+			this.setup();
+			this.resume();
+		}
+		else if (this.isPaused) {
 			this.resume();
 		}
 		else {
-			if (!this.moving) {
-				this.moving = true;
-
-				switch (e.key) {
-					// Space - Drop
-					case ' ': {
-						this.tableEl.movePiece(Move.drop);
-						this.updateTimeInterval();
-					}
-						break;
-					// a - Move left
-					case 'a': {
-						this.tableEl.movePiece(Move.left);
-					}
-						break;
-					// d - Move right
-					case 'd': {
-						this.tableEl.movePiece(Move.right);
-					}
-						break;
-					// s - Move down
-					case 's': {
-						this.tableEl.movePiece(Move.down);
-						this.updateTimeInterval();
-					}
-						break;
-					// j - Rotate left
-					case 'j': {
-						this.tableEl.rotatePiece(Rotation.left);
-					}
-						break;
-					// k - Rotate right
-					case 'k': {
-						this.tableEl.rotatePiece(Rotation.right);
-					}
-						break;
-					// l - Save piece
-					case 'l': {
-						this.tableEl.savePiece();
-						this.updateTimeInterval();
-					}
-						break;
-					// Escape - Pause
-					case 'Esc':
-					case 'Escape': {
-						this.pause();
-					}
-						break;
+			switch (e.key) {
+				// Space - Drop
+				case ' ': {
+					this.table.movePiece(Move.drop);
+					this.executeLogic();
+					this.updateTimeInterval();
 				}
-
-				this.moving = false;
+					break;
+				// a - Move left
+				case 'a': {
+					this.table.movePiece(Move.left);
+				}
+					break;
+				// d - Move right
+				case 'd': {
+					this.table.movePiece(Move.right);
+				}
+					break;
+				// s - Move down
+				case 's': {
+					this.table.movePiece(Move.down);
+					this.executeLogic();
+					this.updateTimeInterval();
+				}
+					break;
+				// j - Rotate left
+				case 'j': {
+					this.table.rotatePiece(Rotation.left);
+				}
+					break;
+				// k - Rotate right
+				case 'k': {
+					this.table.rotatePiece(Rotation.right);
+				}
+					break;
+				// l - Save piece
+				case 'l': {
+					this.table.savePiece();
+					this.updateTimeInterval();
+				}
+					break;
+				// Escape - Pause
+				case 'Esc':
+				case 'Escape': {
+					this.pause();
+				}
+					break;
 			}
 		}
 	}
 
 	private resume() {
 		this.isPaused = false;
-		this.menuEl.resume();
+		this.menu.resume();
 		this.createTimeInterval();
 	}
 
 	private pause() {
 		this.removeTimeInterval();
-		this.menuEl.pause();
+		this.menu.pause();
 		this.isPaused = true;
+	}
+
+	private gameOver() {
+		this.removeTimeInterval();
+		this.menu.gameOver(this.score.value);
+		this.isGameOver = true;
 	}
 
 	private removeTimeInterval() {
@@ -123,8 +119,9 @@ export class Game {
 	}
 
 	private createTimeInterval() {
-		const actualInterval = this.BASE_TIME_INTERVAL / this.levelEl.level;
-		this.fallTimerSubs = interval(actualInterval).subscribe(i => this.loop());
+		if (!this.table.isGameOver) {
+			this.fallTimerSubs = interval(this.BASE_TIME_INTERVAL / this.level.value).subscribe(() => this.tick());
+		}
 	}
 
 	private updateTimeInterval() {
@@ -132,26 +129,72 @@ export class Game {
 		this.createTimeInterval();
 	}
 
-	// GAME LOOP
-	private loop() {
-		this.tableEl.movePiece(Move.down);
+	private executeLogic() {
+		const numTetris = this.table.lastNumberOfTetris;
+		if (numTetris > 0) {
+			// Tetris Score
+			let score = this.TETRIS_SCORE + this.TETRIS_SCORE * (numTetris - 1) * this.TETRIS_SCORE_UPGRADE;
+
+			++this.numTetris;
+			const newLevel = Math.floor(this.numTetris / this.NUM_TETRIS_TO_LEVEL_UP) + 1;
+			if (newLevel > this.level.value) {
+
+				// Level Up Score
+				score += (newLevel - 2 > 0 ? this.LEVEL_UP_SCORE * this.LEVEL_UP_SCORE_UPGRADE * (newLevel - 2) : this.LEVEL_UP_SCORE);
+
+				// Level Up
+				this.level.value = newLevel;
+				this.updateTimeInterval();
+			}
+
+			// Add Score
+			this.score.value += score;
+		}
 
 		// Check GameOver
-		if (this.tableEl.isGameOver) {
+		if (this.table.isGameOver) {
 			this.finish();
 		}
+	}
 
-		// Check LevelUp
-		const newLevel = this.tableEl.numberOfTetris % this.NUM_TETRIS_TO_LEVEL_UP;
-		if (newLevel > this.levelEl.level) {
-			this.levelEl.level = newLevel;
-			this.updateTimeInterval();
+	private clearElements() {
+		this.table.clear();
+		this.menu.clear();
+		this.level.clear();
+		this.score.clear();
+	}
+
+	// GAME SETUP
+	private setup() {
+		// Interface
+		this.table = new Table('game-table', { x: 20, y: 10 } as Vector);
+		this.menu = new Menu('game-menu');
+
+		// Leveling
+		this.level = new Value('game-level', this.STARTING_LEVEL);
+		this.numTetris = 0;
+
+		// Scoring
+		this.score = new Value('game-score', 0);
+
+		// Game start & finish
+		this.isPaused = true;
+		this.isGameOver = false;
+
+		// Movement
+		if (!this.keypressSubs) {
+			this.keypressSubs = fromEvent<KeyboardEvent>(document, 'keydown').subscribe(e => this.processMovement(e));
 		}
+	}
+
+	// GAME TICK
+	private tick() {
+		this.table.movePiece(Move.down);
+		this.executeLogic();
 	}
 
 	// GAME END
 	private finish() {
-		this.keypressSubs.unsubscribe();
-		this.fallTimerSubs.unsubscribe();
+		this.gameOver();
 	}
 }

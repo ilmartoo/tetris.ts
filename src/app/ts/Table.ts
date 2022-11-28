@@ -9,12 +9,14 @@ export class Table extends GameElement {
 	private size: Vector;
 	private readonly grid: Square[] = [];
 
-	private numTetris = 0;
+	private lastNumTetris = 0;
 	private gameOver = false;
 
 	private location: Vector;
 	private piece: Form;
 	private nextPieces: HolderQueue = new HolderQueue([ 'next-1', 'next-2', 'next-3' ]);
+	private readonly pieceBag: number[] = [];
+	private readonly NUM_PIECE_BAGS = 3;
 
 	private holder: Holder = new Holder('hold');
 	private canSave = true;
@@ -32,15 +34,19 @@ export class Table extends GameElement {
 		}
 
 		// Populate nextPieces Array
-		this.nextPieces.next(this.createPiece());
-		this.nextPieces.next(this.createPiece());
-		this.nextPieces.next(this.createPiece());
+		this.nextPieces.next(this.getPiece());
+		this.nextPieces.next(this.getPiece());
+		this.nextPieces.next(this.getPiece());
 
 		// Get principal piece
 		this.newPiece();
 	}
 
-	get numberOfTetris() { return this.numTetris; }
+	get lastNumberOfTetris() {
+		const tetris = this.lastNumTetris;
+		this.lastNumTetris = 0;
+		return tetris;
+	}
 
 	get isGameOver() { return this.gameOver; }
 
@@ -50,27 +56,48 @@ export class Table extends GameElement {
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
 
-	private createPiece(): Form {
-		return FORMS[this.randomInt(0, FORMS.length - 1)];
+	private getPiece(): Form {
+		// Fill bag if empty
+		if (this.pieceBag.length === 0) {
+			this.fillPieceBag();
+		}
+
+		const index = this.randomInt(0, this.pieceBag.length - 1);
+		return FORMS[this.pieceBag.splice(index, 1)[0]];
+	}
+
+	private fillPieceBag(): void {
+		for (let i = 0; i < FORMS.length; ++i) {
+			this.pieceBag.push(... [ ... new Array(this.NUM_PIECE_BAGS) ].map(() => i));
+		}
 	}
 
 	private newPiece(): void {
-
-		// Remove traces from previous square
-		this.unmarkSquares();
 		this.decorateSquares();
+		this.unmarkSquares();
 
 		// New piece
-		this.piece = this.nextPieces.next(this.createPiece());
-		this.resetLocation();
-		this.colored = this.pieceSquares();
+		const newLocation = this.fitNextPiece();
+		if (newLocation) {
+			this.piece = this.nextPieces.next(this.getPiece());
+			this.location = newLocation;
+			this.colored = this.pieceSquares();
 
-		// Draw piece
-		this.drawPiece();
+			// Draw piece
+			this.drawPiece();
+		}
+		else {
+			this.gameOver = true;
+		}
 	}
 
-	private resetLocation(): void {
-		this.location = { x: 0, y: Math.ceil((this.size.y - this.piece.size.y) / 2) };
+	private fitNextPiece(): Vector {
+		const nextPiece = this.nextPieces.peek();
+		let spawnLocation = { x: 0, y: Math.ceil((this.size.y - nextPiece.size.y) / 2) };
+		if (this.isPlaceable(spawnLocation, nextPiece)) {
+			return spawnLocation;
+		}
+		return null;
 	}
 
 	private isDeadSquare(square: Square): boolean {
@@ -146,39 +173,37 @@ export class Table extends GameElement {
 	}
 
 	private checkTetris(): void {
-		const lines: number[] = [];
+		let numTetris = 0;
+		let dropIndex = this.size.x - 1;
+		let checkIndex = dropIndex;
 
-		for (let i = 0; i < this.size.x; ++i) {
-			let allDeadPieces = true;
-			for (let j = 0; j < this.size.y; ++j) {
-				const square = this.at(i, j);
-				allDeadPieces = this.isDeadSquare(square);
+		while (checkIndex >= 0) {
+			let tetris = true;
+			for (let col = 0; col < this.size.y; col++) {
+				if (tetris) {
+					tetris = this.isDeadSquare(this.at(checkIndex, col));
+				}
 			}
-			if (allDeadPieces) {
-				lines.push(i);
+
+			if (tetris) {
+				numTetris++;
 			}
+			else {
+				if (numTetris > 0) {
+					for (let col = 0; col < this.size.y; col++) {
+						this.at(dropIndex, col).color = this.at(checkIndex, col).color;
+					}
+				}
+				--dropIndex;
+			}
+			checkIndex = dropIndex - numTetris;
 		}
 
-		// if (lines.length > 0) {
-		// 	this.numTetris++;
-		//
-		// // for (const l of lines) {
-		// // 	for (let j = 0; j < this.size.y; ++j) {
-		// // 		// Todo move rows down
-		// // 	}
-		// // }
-		// // this.element.children
-		//
-		// // TODO: scoring
-		// //
-		// // for (const i of lines) {
-		// // 	// this.element.children
-		// // 	console.log('Line', i);
-		// // 	const squares = this.grid.splice(i * this.size.y, this.size.y);
-		// // 	squares.forEach(s => s.clear());
-		// // 	this.grid.unshift(...squares);
-		// // }
-		// }
+		for (let i = 0; i < numTetris * this.size.y; i++) {
+			this.grid[i].clear();
+		}
+
+		this.lastNumTetris = numTetris;
 	}
 
 	movePiece(move: Move): void {
@@ -189,9 +214,7 @@ export class Table extends GameElement {
 				--location.y;
 				if (this.isPlaceable(location)) {
 					this.location = location;
-				}
-				else {
-					return; // No printing needed
+					this.drawPiece();
 				}
 			}
 				break;
@@ -201,9 +224,7 @@ export class Table extends GameElement {
 				++location.y;
 				if (this.isPlaceable(location)) {
 					this.location = location;
-				}
-				else {
-					return; // No printing needed
+					this.drawPiece();
 				}
 			}
 				break;
@@ -213,6 +234,7 @@ export class Table extends GameElement {
 				++location.x;
 				if (this.isPlaceable(location)) {
 					this.location = location;
+					this.drawPiece();
 				}
 				else {
 					this.killPiece();
@@ -236,7 +258,6 @@ export class Table extends GameElement {
 			}
 				break;
 		}
-		this.drawPiece();
 	}
 
 	rotatePiece(rotation: Rotation): void {
@@ -252,27 +273,6 @@ export class Table extends GameElement {
 			this.piece = rotatedPiece;
 		}
 
-		// let max: number;
-		// let base: number;
-		// if (diff > 0) {
-		// 	max = this.piece.size.y;
-		// 	base = Math.floor(diff / 2);
-		// }
-		// else if (diff < 0) {
-		// 	max = this.piece.size.x;
-		// 	base = Math.round(diff / 2);
-		// }
-
-
-		// for(let i = base, j = 0; j < max; ++j, i += j * ((j & 1) ? 1 : -1)) {
-		// 	const newLocation: Vector = {x: this.location.x, y: this.location.y - j};
-		// 	if (this.isPlaceable(newLocation, rotatedPiece)) {
-		// 		this.location = newLocation;
-		// 		this.piece = rotatedPiece;
-		// 		break;
-		// 	}
-		// }
-
 		this.drawPiece();
 	}
 
@@ -286,15 +286,18 @@ export class Table extends GameElement {
 				this.newPiece();
 			}
 			else {
-				this.canSave = false;
+				// Change pieces if saved piece can be placed
+				const newLocation = this.fitNextPiece();
+				if (newLocation) {
+					this.canSave = false;
 
-				const saved = this.holder.piece;
-				this.holder.piece = this.piece;
-				this.piece = saved;
+					const saved = this.holder.piece;
+					this.holder.piece = this.piece;
+					this.piece = saved;
+					this.location = newLocation;
 
-				this.resetLocation();
-
-				this.drawPiece();
+					this.drawPiece();
+				}
 			}
 		}
 	}
