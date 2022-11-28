@@ -6,9 +6,10 @@ import { Level } from './Level';
 
 export class Game {
 	// Elements
-	private tableEl: Table;
-	private menuEl: Menu;
-	private levelEl: Level;
+	private table: Table;
+	private menu: Menu;
+	private level: Value;
+	private score: Value;
 
 	// Game Start
 	private isPaused: boolean;
