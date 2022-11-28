@@ -15,6 +15,9 @@ export class Game {
 	private isPaused: boolean;
 	private isGameOver: boolean;
 
+	// Audio
+	private song: HTMLAudioElement;
+
 	// Movement
 	private keypressSubs: Subscription;
 
@@ -98,6 +101,7 @@ export class Game {
 
 	private resume() {
 		this.isPaused = false;
+		this.song.play();
 		this.menu.resume();
 		this.createTimeInterval();
 	}
@@ -105,6 +109,7 @@ export class Game {
 	private pause() {
 		this.removeTimeInterval();
 		this.menu.pause();
+		this.song.pause();
 		this.isPaused = true;
 	}
 
@@ -112,6 +117,7 @@ export class Game {
 		this.removeTimeInterval();
 		this.menu.gameOver(this.score.value);
 		this.isGameOver = true;
+		this.song.pause();
 	}
 
 	private removeTimeInterval() {
@@ -180,6 +186,11 @@ export class Game {
 		// Game start & finish
 		this.isPaused = true;
 		this.isGameOver = false;
+
+		// Audio
+		this.song = new Audio("https://ia600401.us.archive.org/3/items/Cartoon-OnOnft.DanielLevi/Cartoon-OnOnft.DanielLevi.mp3");
+		this.song.volume = 0.4;
+		this.song.loop = true;
 
 		// Movement
 		if (!this.keypressSubs) {
