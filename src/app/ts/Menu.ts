@@ -12,6 +12,7 @@ export class Menu extends GameElement {
 		'<div class="tecla center-text">J</div> <div class="center-text">Rotates the piece left</div>' +
 		'<div class="tecla center-text">K</div> <div class="center-text">Rotates the piece right</div>' +
 		'<div class="tecla center-text">L</div> <div class="center-text">Saves the piece for later</div>';
+	private readonly GAME_OVER_HTML = (score: number) => `<div class="title center-text"><span>GAME OVER<br><br><span class="tecla">SCORE: ${score}</span></span></div>`;
 
 	constructor(id: string) {
 		super(document.getElementById(id));
@@ -27,4 +28,8 @@ export class Menu extends GameElement {
 		this.element.classList.add('resumed');
 	}
 
+	gameOver(score: number) {
+		this.element.innerHTML = this.GAME_OVER_HTML(score);
+		this.element.classList.remove('resumed');
+	}
 }
