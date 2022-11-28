@@ -9,7 +9,7 @@ export class Table extends GameElement {
 	private size: Vector;
 	private readonly grid: Square[] = [];
 
-	private lastNumTetris = 0;
+	private lastNumBreaks = 0;
 	private gameOver = false;
 
 	private location: Vector;
@@ -42,10 +42,10 @@ export class Table extends GameElement {
 		this.newPiece();
 	}
 
-	get lastNumberOfTetris() {
-		const tetris = this.lastNumTetris;
-		this.lastNumTetris = 0;
-		return tetris;
+	get lastNumberOfBreaks() {
+		const breaks = this.lastNumBreaks;
+		this.lastNumBreaks = 0;
+		return breaks;
 	}
 
 	get isGameOver() { return this.gameOver; }
@@ -165,45 +165,45 @@ export class Table extends GameElement {
 		// Reset save permission
 		this.canSave = true;
 
-		// Check for tetris
-		this.checkTetris();
+		// Check for breaks
+		this.checkBreaks();
 
 		// Get new piece
 		this.newPiece();
 	}
 
-	private checkTetris(): void {
-		let numTetris = 0;
+	private checkBreaks(): void {
+		let numBreaks = 0;
 		let dropIndex = this.size.x - 1;
 		let checkIndex = dropIndex;
 
 		while (checkIndex >= 0) {
-			let tetris = true;
+			let breaks = true;
 			for (let col = 0; col < this.size.y; col++) {
-				if (tetris) {
-					tetris = this.isDeadSquare(this.at(checkIndex, col));
+				if (breaks) {
+					breaks = this.isDeadSquare(this.at(checkIndex, col));
 				}
 			}
 
-			if (tetris) {
-				numTetris++;
+			if (breaks) {
+				numBreaks++;
 			}
 			else {
-				if (numTetris > 0) {
+				if (numBreaks > 0) {
 					for (let col = 0; col < this.size.y; col++) {
 						this.at(dropIndex, col).color = this.at(checkIndex, col).color;
 					}
 				}
 				--dropIndex;
 			}
-			checkIndex = dropIndex - numTetris;
+			checkIndex = dropIndex - numBreaks;
 		}
 
-		for (let i = 0; i < numTetris * this.size.y; i++) {
+		for (let i = 0; i < numBreaks * this.size.y; i++) {
 			this.grid[i].clear();
 		}
 
-		this.lastNumTetris = numTetris;
+		this.lastNumBreaks = numBreaks;
 	}
 
 	movePiece(move: Move): void {

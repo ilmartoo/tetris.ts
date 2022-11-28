@@ -1,7 +1,7 @@
 {
-	"name": "tetris",
+	"name": "block-game-counterfit",
 	"version": "1.0.0",
-	"description": "Tetris counterfeit to start on game development",
+	"description": "Tetris look-alike to start on game development",
 	"scripts": {
 		"makeTarget": "rimraf target/ && make-dir target/",
 		"copyFiles": "copyfiles -f src/static/* target/",
@@ -11,7 +11,8 @@
 	},
 	"keywords": [
 		"tetris",
-		"game"
+		"game",
+		"counterfit"
 	],
 	"author": "github.com/ilmartoo",
 	"license": "MIT",

@@ -21,13 +21,13 @@ export class Game {
 	// Leveling
 	private readonly STARTING_LEVEL = 1;
 	private readonly BASE_TIME_INTERVAL = 2000; // 2 seconds
-	private readonly NUM_TETRIS_TO_LEVEL_UP = 5;
-	private numTetris: number;
+	private readonly NUM_BREAKS_TO_LEVEL_UP = 5;
+	private numBreaks: number;
 	private fallTimerSubs: Subscription;
 
 	// Scoring
-	private readonly TETRIS_SCORE = 100;
-	private readonly TETRIS_SCORE_UPGRADE = 1.6;
+	private readonly BREAKS_SCORE = 100;
+	private readonly BREAKS_SCORE_UPGRADE = 1.6;
 	private readonly LEVEL_UP_SCORE = 250;
 	private readonly LEVEL_UP_SCORE_UPGRADE = 1.5;
 
@@ -130,13 +130,13 @@ export class Game {
 	}
 
 	private executeLogic() {
-		const numTetris = this.table.lastNumberOfTetris;
-		if (numTetris > 0) {
-			// Tetris Score
-			let score = this.TETRIS_SCORE + this.TETRIS_SCORE * (numTetris - 1) * this.TETRIS_SCORE_UPGRADE;
+		const numBreaks = this.table.lastNumberOfBreaks;
+		if (numBreaks > 0) {
+			// Breaks Score
+			let score = this.BREAKS_SCORE + this.BREAKS_SCORE * (numBreaks - 1) * this.BREAKS_SCORE_UPGRADE;
 
-			++this.numTetris;
-			const newLevel = Math.floor(this.numTetris / this.NUM_TETRIS_TO_LEVEL_UP) + 1;
+			++this.numBreaks;
+			const newLevel = Math.floor(this.numBreaks / this.NUM_BREAKS_TO_LEVEL_UP) + 1;
 			if (newLevel > this.level.value) {
 
 				// Level Up Score
@@ -172,7 +172,7 @@ export class Game {
 
 		// Leveling
 		this.level = new Value('game-level', this.STARTING_LEVEL);
-		this.numTetris = 0;
+		this.numBreaks = 0;
 
 		// Scoring
 		this.score = new Value('game-score', 0);
