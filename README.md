@@ -1,4 +1,3 @@
-# Block Game Counterfit
+# Tetris
 
-[@ilmartoo](https://github.com/ilmartoo)'s recreation of the popular game [Tetris®](https://tetris.com)
-using HTML, CSS & Typescript
+My recreation of the popular game [Tetris®](https://tetris.com) using HTML, CSS & Typescript.
