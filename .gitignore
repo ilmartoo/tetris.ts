@@ -1,12 +1,17 @@
-# Node files
+# Node.js dependencies
 node_modules/
+package-lock.json
 
-# IntelliJ Files
+# Build files
+build/
+
+# Compiled TypeScript files
+*.js
+*.js.map
+
+# GitHub Actions workflow temp files
+.github/workflows/*.log
+
+# Editors
+.vscode/
 .idea/
-
-# Typescript compiled files
-src/**/*.js
-src/**/*.js.map
-
-# Output directory
-target/

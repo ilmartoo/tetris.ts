@@ -1,11 +1,13 @@
 {
-	"compilerOptions": {
-		"target": "es5",
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"sourceMap": true
-	},
-	"files": [
-		"src/ts/main.ts"
-	]
+  "compilerOptions": {
+    "outDir": "./build",
+    "module": "ESNext",
+    "target": "ES6",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }
